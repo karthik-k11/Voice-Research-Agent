@@ -15,3 +15,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#Mount Static Files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+#Defining the Data Model
+class VoiceQuery(BaseModel):
+    text: str
+
+#The API Endpoint
+@app.post("/process-voice")
+async def process_voice(query: VoiceQuery):
+    print(f"🎤 RECEIVED AUDIO TEXT: {query.text}")
+    
+    response_text = f"I heard you say: {query.text}. The research agent is not active yet, but the connection is working."
+    
+    return {"reply": response_text}
