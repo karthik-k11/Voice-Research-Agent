@@ -30,3 +30,8 @@ async def process_voice(query: VoiceQuery):
     response_text = f"I heard you say: {query.text}. The research agent is not active yet, but the connection is working."
     
     return {"reply": response_text}
+
+#Root endpoint to check status
+@app.get("/")
+async def read_root():
+    return {"status": "Deep-Dive Agent is Online"}
