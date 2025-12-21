@@ -30,3 +30,11 @@ def search_arxiv(query, max_results=2):
         return "\n\n".join(results)
     except Exception as e:
         return f"ArXiv error: {e}"
+    
+#Search Web using DuckDuckGo
+def search_web(query, max_results=3):
+    try:
+        print(f"🔎 Searching Web for: {query}")
+        results = DDGS().text(query, max_results=max_results)
+        if not results:
+            return "No web results found."
