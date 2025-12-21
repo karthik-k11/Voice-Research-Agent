@@ -22,3 +22,11 @@ def search_arxiv(query, max_results=2):
             max_results=max_results,
             sort_by=arxiv.SortCriterion.Relevance
         )
+
+        results = []
+        for result in client.results(search):
+            results.append(f"Title: {result.title}\nSummary: {result.summary[:200]}...") # Truncate for speed
+            
+        return "\n\n".join(results)
+    except Exception as e:
+        return f"ArXiv error: {e}"
