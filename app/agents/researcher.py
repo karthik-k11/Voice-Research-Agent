@@ -38,3 +38,8 @@ def search_web(query, max_results=3):
         results = DDGS().text(query, max_results=max_results)
         if not results:
             return "No web results found."
+
+        formatted_results = [f"{r['title']}: {r['body']}" for r in results]
+        return "\n\n".join(formatted_results)
+    except Exception as e:
+        return f"Web search error: {e}"
