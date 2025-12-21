@@ -43,3 +43,26 @@ def search_web(query, max_results=3):
         return "\n\n".join(formatted_results)
     except Exception as e:
         return f"Web search error: {e}"
+
+#The tool calling function
+def perform_research(topic):
+    print(f"🚀 Starting research on: {topic}")
+    
+    # Gather data
+    wiki_data = search_wiki(topic)
+    arxiv_data = search_arxiv(topic)
+    web_data = search_web(topic)
+    
+    # Combine into a single text block
+    full_report = f"""
+    === WIKIPEDIA ===
+    {wiki_data}
+    
+    === ACADEMIC PAPERS (ArXiv) ===
+    {arxiv_data}
+    
+    === WEB SEARCH ===
+    {web_data}
+    """
+    
+    return full_report
