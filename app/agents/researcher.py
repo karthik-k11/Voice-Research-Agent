@@ -11,3 +11,14 @@ def search_wiki(query, sentences=3):
         return summary
     except Exception as e:
         return f"Wikipedia error: {e}"
+
+#Search ArXiv, which is good for technical papers
+def search_arxiv(query, max_results=2):
+    try:
+        print(f"🔎 Searching ArXiv for: {query}")
+        client = arxiv.Client()
+        search = arxiv.Search(
+            query=query,
+            max_results=max_results,
+            sort_by=arxiv.SortCriterion.Relevance
+        )
