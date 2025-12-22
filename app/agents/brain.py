@@ -1,16 +1,15 @@
-#Imports
+##Imports 
 import os
 from dotenv import load_dotenv
 from groq import Groq
 
-#Load environment variables from .env file
 load_dotenv()
 
-#Get the key securely
 api_key = os.getenv("GROQ_API_KEY")
 
+# Check if key exists
 if not api_key:
-    raise ValueError("GROQ_API_KEY is missing! Check your .env file.")
+    print("ERROR: GROQ_API_KEY not found in .env")
 
 client = Groq(api_key=api_key)
 
@@ -28,7 +27,7 @@ def think(research_text):
                     "content": f"Here is the research data found:\n{research_text}\n\nSummarize this for me."
                 }
             ],
-            model="llama3-8b-8192",  ##llm3
+            model="llama-3.1-8b-instant", 
             temperature=0.6,
         )
         response = chat_completion.choices[0].message.content
