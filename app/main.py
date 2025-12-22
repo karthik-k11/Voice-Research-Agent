@@ -1,12 +1,16 @@
-#Necessary imports
-from fastapi import FastAPI, Request
+##Necessary Imports
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+#IMPORT AGENTS
+from app.agents.researcher import perform_research
+from app.agents.brain import think
+
 app = FastAPI()
 
-#Enable CORS (Allows the browser to talk to the backend)
+#CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,23 +19,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-#Mount Static Files
+#Mount Frontend
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-#Defining the Data Model
+#Data Model
 class VoiceQuery(BaseModel):
     text: str
 
-#The API Endpoint
+#The Core Logic Endpoint
 @app.post("/process-voice")
 async def process_voice(query: VoiceQuery):
-    print(f"🎤 RECEIVED AUDIO TEXT: {query.text}")
+    print(f"\n🎤 RECEIVED: {query.text}")
     
-    response_text = f"I heard you say: {query.text}. The research agent is not active yet, but the connection is working."
-    
-    return {"reply": response_text}
+    if len(query.text) < 3:
+        return {"reply": "I didn't catch that. Please speak again."}
 
-#Root endpoint to check status
+    #Research Phase
+    raw_data = perform_research(query.text)
+    
+    #Thinking Phase 3
+    summary = think(raw_data)
+    
+    print(f"REPLY: {summary}")
+    
+    ##Response
+    return {"reply": summary}
+
 @app.get("/")
 async def read_root():
     return {"status": "Deep-Dive Agent is Online"}
