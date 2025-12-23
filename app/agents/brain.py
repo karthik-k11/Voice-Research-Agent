@@ -5,6 +5,7 @@ from groq import Groq
 
 load_dotenv()
 
+##API Key storing
 api_key = os.getenv("GROQ_API_KEY")
 
 # Check if key exists
