@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 #IMPORT AGENTS
+from app.agents.planner import extract_search_term
 from app.agents.researcher import perform_research
 from app.agents.brain import think
 
