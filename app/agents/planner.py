@@ -25,3 +25,7 @@ def extract_search_term(user_input):
             temperature=0, # 0 means "be exact, don't be creative"
             max_tokens=20
         )
+
+        refined_query = completion.choices[0].message.content.strip()
+        print(f"✨ OPTIMIZED QUERY: {refined_query}")
+        return refined_query
