@@ -3,52 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deep-Dive Voice Agent</title>
+    <title>Deep-Dive Research Agent</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f4f4f9; }
-        #status { margin-top: 20px; font-weight: bold; color: #555; }
-        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; transition: background 0.3s; }
-        button:hover { background-color: #0056b3; }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
-        #response-area { margin-top: 20px; padding: 15px; border: 1px solid #ddd; background: white; width: 80%; max-width: 600px; min-height: 100px; }
+        :root { --primary: #00f2ea; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        
+        /* The Main Card */
+        .container { background: var(--card); padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; width: 90%; max-width: 500px; border: 1px solid #334155; }
+        
+        h1 { margin-bottom: 10px; font-size: 24px; background: linear-gradient(90deg, #00f2ea, #ff0050); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #94a3b8; margin-bottom: 30px; }
+
+        /* The Button */
+        button {
+            background: linear-gradient(135deg, #00f2ea 0%, #007bff 100%);
+            border: none; padding: 18px 40px; color: #000; font-weight: bold; font-size: 18px; border-radius: 50px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 20px rgba(0, 242, 234, 0.4);
+        }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 242, 234, 0.6); }
+        button:disabled { background: #334155; color: #64748b; box-shadow: none; cursor: not-allowed; transform: scale(1); }
+
+        /* Status & Response Areas */
+        #status { margin-top: 25px; font-weight: 600; color: var(--primary); height: 24px; }
+        #response-area { 
+            margin-top: 20px; text-align: left; background: #0b1120; padding: 20px; border-radius: 10px; border-left: 4px solid var(--primary); 
+            min-height: 80px; font-size: 1.1em; line-height: 1.6; opacity: 0; transition: opacity 0.5s;
+        }
+        #response-area.visible { opacity: 1; }
+
+        /* Pulsing Animation for Recording */
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 0, 80, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 0, 80, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 0, 80, 0); } }
+        .recording { animation: pulse 1.5s infinite; background: linear-gradient(135deg, #ff0050 0%, #cc0040 100%) !important; color: white !important; }
     </style>
 </head>
 <body>
 
-    <h1>🎙️ Deep-Dive Research Agent</h1>
-    <button id="recordBtn">Tap to Speak</button>
-    <p id="status">Ready...</p>
-    
-    <div id="response-area">Response will appear here...</div>
+    <div class="container">
+        <h1>🎙️ Deep-Dive Agent</h1>
+        <p>Autonomous Research System v1.0</p>
+        
+        <button id="recordBtn">Tap to Speak</button>
+        <div id="status">Ready</div>
+        <div id="response-area"></div>
+    </div>
 
     <script>
         const recordBtn = document.getElementById('recordBtn');
         const status = document.getElementById('status');
         const responseArea = document.getElementById('response-area');
+        let recognition;
 
-        // 1. Setup Speech Recognition (Browser Native)
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (!SpeechRecognition) {
-            alert("Your browser does not support Web Speech API. Try Chrome or Edge.");
-        } else {
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US'; 
+        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
             recognition.interimResults = false;
 
-            recordBtn.onclick = () => {
-                recognition.start();
-                status.innerText = "Listening...";
-                recordBtn.disabled = true;
+            recognition.onstart = () => {
+                recordBtn.classList.add('recording');
+                recordBtn.innerText = "Listening...";
+                status.innerText = "Listening to your voice...";
             };
 
-            // 2. Capture Result
+            recognition.onend = () => {
+                recordBtn.classList.remove('recording');
+                recordBtn.disabled = true;
+                recordBtn.innerText = "Processing...";
+            };
+
             recognition.onresult = async (event) => {
                 const transcript = event.results[0][0].transcript;
-                status.innerText = "Processing...";
-                responseArea.innerText = "You said: " + transcript;
+                
+                // UX:
+                simulateThinkingProcess(transcript);
 
-                // 3. Send to FastAPI Backend
                 try {
                     const response = await fetch("http://127.0.0.1:8000/process-voice", {
                         method: "POST",
@@ -58,28 +86,46 @@
                     
                     const data = await response.json();
                     
-                    // 4. Display & Speak Response
-                    responseArea.innerText = "Agent: " + data.reply;
+                    status.innerText = "Complete";
+                    responseArea.innerText = data.reply;
+                    responseArea.classList.add('visible');
                     speakResponse(data.reply);
                     
                 } catch (error) {
                     console.error("Error:", error);
-                    status.innerText = "Error connecting to backend.";
+                    status.innerText = "Error: Backend Offline";
                 }
-
-                status.innerText = "Ready";
                 recordBtn.disabled = false;
+                recordBtn.innerText = "Tap to Speak";
             };
-
-            recognition.onerror = (event) => {
-                status.innerText = "Error occurred in recognition: " + event.error;
-                recordBtn.disabled = false;
-            };
+        } else {
+            alert("Browser not supported. Please use Chrome/Edge.");
         }
 
-        // 5. TTS (Text to Speech) Helper
+
+        function simulateThinkingProcess(query) {
+            responseArea.classList.remove('visible');
+            const steps = [
+                `User said: "${query}"`,
+                "🔎 Searching Wikipedia & ArXiv...",
+                "🧠 Reading Search Results...",
+                "🤖 Synthesizing Answer..."
+            ];
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < steps.length) {
+                    status.innerText = steps[i];
+                    i++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 800);
+        }
+
         function speakResponse(text) {
             const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.0; 
             window.speechSynthesis.speak(utterance);
         }
     </script>
