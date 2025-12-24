@@ -27,5 +27,9 @@ def extract_search_term(user_input):
         )
 
         refined_query = completion.choices[0].message.content.strip()
-        print(f"✨ OPTIMIZED QUERY: {refined_query}")
+        print(f"OPTIMIZED QUERY: {refined_query}")
         return refined_query
+    
+    except Exception as e:
+        print(f"Planner Error: {e}")
+        return user_input # Fallback to original text if AI fails
