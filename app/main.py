@@ -30,22 +30,19 @@ class VoiceQuery(BaseModel):
 #The Core Logic Endpoint
 @app.post("/process-voice")
 async def process_voice(query: VoiceQuery):
-    print(f"\n🎤 RECEIVED: {query.text}")
+    print(f"\nRECEIVED: {query.text}")
     
     if len(query.text) < 3:
         return {"reply": "I didn't catch that. Please speak again."}
 
-    #Research Phase
-    raw_data = perform_research(query.text)
+    #Optimize the Search
+    search_term = extract_search_term(query.text)
+
+    # Execute Search with clean terms
+    raw_data = perform_research(search_term)
     
-    #Thinking Phase 3
+    #Synthesize Answer
     summary = think(raw_data)
     
     print(f"REPLY: {summary}")
-    
-    ##Response
     return {"reply": summary}
-
-@app.get("/")
-async def read_root():
-    return {"status": "Deep-Dive Agent is Online"}
