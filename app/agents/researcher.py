@@ -38,10 +38,12 @@ def search_arxiv(query, max_results=2):
 def search_web(query, max_results=3):
     print(f"Searching Web for: {query}")
     try:
-        #forces English results, avoiding location bias
-        results = DDGS().text(query, region='wt-wt', max_results=max_results)
+        # TIMELIMIT='y' forces results from the past Year.
+        results = DDGS().text(query, region='wt-wt', max_results=max_results, timelimit='y')
+        
         if not results:
             return "No web results found."
+            
         formatted = [f"Web: {r['title']} - {r['body']}" for r in results]
         return "\n\n".join(formatted)
     except Exception as e:
