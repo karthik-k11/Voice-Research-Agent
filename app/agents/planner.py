@@ -13,21 +13,20 @@ def extract_search_term(user_input):
             messages=[
                 {
                     "role": "system", 
-                    #UPDATED PROMPT
                     "content": """You are a Search Query Optimizer. 
-                    Your job is to generate the BEST search keywords to get accurate data.
+                    Your job is to generate the BROADEST search keywords to ensure we find data.
                     
                     RULES:
                     1. Strip conversational fluff ("Tell me about", "I want to know").
-                    2. If the user asks for "rumors" or "leaks", change it to "latest news" or "specs" (so we find launched products too).
+                    2. COMBINE terms to cover all bases:
+                       - If user asks for "rumors" -> Output "rumors leaks release date specs"
+                       - If user asks for "news" -> Output "latest news reviews specs"
                     3. Output ONLY the keywords.
                     
                     Example:
                     Input: 'What are the rumors about iPhone 17'
-                    Output: iPhone 17 latest news specs
-                    
-                    Input: 'History of Rome'
-                    Output: Roman Empire History"""
+                    Output: iPhone 17 rumors leaks release date specs
+                    """
                 },
                 {
                     "role": "user", 
@@ -36,7 +35,7 @@ def extract_search_term(user_input):
             ],
             model="llama-3.1-8b-instant",
             temperature=0,
-            max_tokens=30
+            max_tokens=40
         )
         
         refined_query = completion.choices[0].message.content.strip()
