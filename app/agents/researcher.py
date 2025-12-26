@@ -1,17 +1,16 @@
-#Necessary imports 
+# app/agents/researcher.py
+##Imports
 import wikipedia
 import arxiv
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
+##Search Wikipedia
 def search_wiki(query):
     print(f"Searching Wikipedia for: {query}")
     try:
-        #Search for titles first
         search_results = wikipedia.search(query)
         if not search_results:
             return "No Wikipedia page found."
-        
-        #Get the summary of the first result
         summary = wikipedia.summary(search_results[0], sentences=4)
         return summary
     except wikipedia.exceptions.DisambiguationError as e:
@@ -19,6 +18,7 @@ def search_wiki(query):
     except Exception as e:
         return f"Wikipedia error: {e}"
 
+##ArXiv
 def search_arxiv(query, max_results=2):
     print(f"Searching ArXiv for: {query}")
     try:
@@ -35,22 +35,29 @@ def search_arxiv(query, max_results=2):
     except Exception as e:
         return f"ArXiv error: {e}"
 
+#Search Web 
 def search_web(query, max_results=3):
     print(f"Searching Web for: {query}")
+    
+    ##Time filter 
+    time_filter = None 
+    if "news" in query.lower() or "latest" in query.lower() or "today" in query.lower():
+        time_filter = 'd'
+        print(f"NEWS MODE ACTIVATED: Filtering for past week ({time_filter})...")
+    
     try:
-        # TIMELIMIT='y' forces results from the past Year.
-        results = DDGS().text(query, region='wt-wt', max_results=max_results, timelimit='y')
+        results = DDGS().text(query, region='wt-wt', max_results=max_results, timelimit=time_filter)
         
         if not results:
-            return "No web results found."
+            return "No recent web results found."
             
-        formatted = [f"Web: {r['title']} - {r['body']}" for r in results]
+        formatted = [f"Web ({r['title']}): {r['body']}" for r in results]
         return "\n\n".join(formatted)
     except Exception as e:
         return f"Web search error: {e}"
 
+##Main function
 def perform_research(topic):
-
     wiki = search_wiki(topic)
     web = search_web(topic)
     
