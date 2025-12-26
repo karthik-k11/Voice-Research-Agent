@@ -42,9 +42,8 @@ def search_web(query, max_results=3):
     ##Time filter 
     time_filter = None 
     if "news" in query.lower() or "latest" in query.lower() or "today" in query.lower():
-        time_filter = 'd'
+        time_filter = 'w'
         print(f"NEWS MODE ACTIVATED: Filtering for past week ({time_filter})...")
-    
     try:
         results = DDGS().text(query, region='wt-wt', max_results=max_results, timelimit=time_filter)
         
