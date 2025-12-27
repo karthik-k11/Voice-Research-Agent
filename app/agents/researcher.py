@@ -6,7 +6,7 @@ from ddgs import DDGS
 
 ##Search Wikipedia
 def search_wiki(query):
-    print(f"Searching Wikipedia for: {query}")
+    print(f"🔎 Searching Wikipedia for: {query}")
     try:
         search_results = wikipedia.search(query)
         if not search_results:
@@ -18,7 +18,7 @@ def search_wiki(query):
     except Exception as e:
         return f"Wikipedia error: {e}"
 
-##ArXiv
+##Search ArXiv
 def search_arxiv(query, max_results=2):
     print(f"Searching ArXiv for: {query}")
     try:
@@ -35,37 +35,35 @@ def search_arxiv(query, max_results=2):
     except Exception as e:
         return f"ArXiv error: {e}"
 
-#Search Web 
+##Search Web
 def search_web(query, max_results=3):
     print(f"Searching Web for: {query}")
     
-    ##Time filter 
-    time_filter = None 
     if "news" in query.lower() or "latest" in query.lower() or "today" in query.lower():
-        time_filter = 'w'
-        print(f"NEWS MODE ACTIVATED: Filtering for past week ({time_filter})...")
-    try:
-        results = DDGS().text(query, region='wt-wt', max_results=max_results, timelimit=time_filter)
-        
-        if not results:
-            return "No recent web results found."
+        print(f"NEWS MODE ACTIVATED: Switching to DDGS News Search...")
+        try:
+            #DDGS().news() returns specific articles, not homepages!
+            results = list(DDGS().news(keywords=query, region='wt-wt', max_results=max_results))
+            if not results:
+                return "No news articles found."
             
-        formatted = [f"Web ({r['title']}): {r['body']}" for r in results]
-        return "\n\n".join(formatted)
-    except Exception as e:
-        return f"Web search error: {e}"
+            formatted = [f"News ({r['title']}): {r['body']} (Source: {r['source']})" for r in results]
+            return "\n\n".join(formatted)
+        except Exception as e:
+            return f"News search error: {e}"
+    else:
+        # Standard Text Search for non-news queries
+        try:
+            results = DDGS().text(query, region='wt-wt', max_results=max_results, timelimit='y')
+            if not results:
+                return "No web results found."
+            formatted = [f"Web ({r['title']}): {r['body']}" for r in results]
+            return "\n\n".join(formatted)
+        except Exception as e:
+            return f"Web search error: {e}"
 
-##Main function
+##The main function
 def perform_research(topic):
     wiki = search_wiki(topic)
     web = search_web(topic)
-    
-    return f"""
-    TOPIC: {topic}
-    
-    SOURCE 1: WIKIPEDIA
-    {wiki}
-    
-    SOURCE 2: WEB SEARCH
-    {web}
-    """
+    return f"TOPIC: {topic}\n\nSOURCE 1: WIKIPEDIA\n{wiki}\n\nSOURCE 2: WEB\n{web}"
