@@ -3,113 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deep-Dive Research Agent</title>
+    <title>Voice Research Agent</title>
     <style>
-        :root { --primary: #00f2ea; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        
-        /* The Main Card */
-        .container { background: var(--card); padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; width: 90%; max-width: 500px; border: 1px solid #334155; }
-        
-        h1 { margin-bottom: 10px; font-size: 24px; background: linear-gradient(90deg, #00f2ea, #ff0050); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        p { color: #94a3b8; margin-bottom: 30px; }
-
-        /* The Button */
-        button {
-            background: linear-gradient(135deg, #00f2ea 0%, #007bff 100%);
-            border: none; padding: 18px 40px; color: #000; font-weight: bold; font-size: 18px; border-radius: 50px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 0 20px rgba(0, 242, 234, 0.4);
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --error-color: #ef4444;
         }
-        button:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 242, 234, 0.6); }
-        button:disabled { background: #334155; color: #64748b; box-shadow: none; cursor: not-allowed; transform: scale(1); }
 
-        /* Status & Response Areas */
-        #status { margin-top: 25px; font-weight: 600; color: var(--primary); height: 24px; }
-        #response-area { 
-            margin-top: 20px; text-align: left; background: #0b1120; padding: 20px; border-radius: 10px; border-left: 4px solid var(--primary); 
-            min-height: 80px; font-size: 1.1em; line-height: 1.6; opacity: 0; transition: opacity 0.5s;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Full viewport height */
+            overflow: hidden; /* Prevent body scroll, we scroll the content */
         }
-        #response-area.visible { opacity: 1; }
 
-        /* Pulsing Animation for Recording */
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 0, 80, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 0, 80, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 0, 80, 0); } }
-        .recording { animation: pulse 1.5s infinite; background: linear-gradient(135deg, #ff0050 0%, #cc0040 100%) !important; color: white !important; }
+        /* Header and controls */
+        .header {
+            background-color: var(--bg-color);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0; /* Don't shrink the header */
+        }
+
+        .status-container {
+            margin-bottom: 15px;
+            height: 24px;
+        }
+
+        .status-text {
+            font-size: 1rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* --- Buttons --- */
+        .mic-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), #0ea5e9);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mic-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+        }
+
+        .mic-btn.listening {
+            animation: pulse 1.5s infinite;
+            background: #ef4444; /* Red when recording */
+        }
+
+        .mic-icon {
+            width: 32px;
+            height: 32px;
+            fill: white;
+        }
+
+        /* STOP BUTTON (New) */
+        .stop-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #334155;
+            border: 2px solid #ef4444;
+            color: #ef4444;
+            cursor: pointer;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .stop-btn:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .stop-btn.visible {
+            display: flex; /* Show when active */
+        }
+
+        /* --- SCROLLABLE CONTENT AREA --- */
+        .content-area {
+            flex-grow: 1; /* Take up remaining space */
+            overflow-y: auto; /* Enable scrolling */
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        /* Chat Bubbles */
+        .message {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            line-height: 1.6;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-msg {
+            background-color: #334155;
+            color: #e2e8f0;
+            margin-left: auto; /* Align right */
+            border-bottom-right-radius: 2px;
+        }
+
+        .agent-msg {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--accent-color);
+            margin-right: auto; /* Align left */
+            border-bottom-left-radius: 2px;
+            white-space: pre-wrap; /* Preserve formatting */
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>🎙️ Deep-Dive Agent</h1>
-        <p>Autonomous Research System v1.0</p>
+    <div class="header">
+        <div class="status-container">
+            <span id="status" class="status-text">Ready to help</span>
+        </div>
         
-        <button id="recordBtn">Tap to Speak</button>
-        <div id="status">Ready</div>
-        <div id="response-area"></div>
+        <div class="controls">
+            <button id="stopBtn" class="stop-btn" title="Stop Speaking">
+                ⬛
+            </button>
+
+            <button id="micBtn" class="mic-btn">
+                <svg class="mic-icon" viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            </button>
+        </div>
     </div>
 
+    <div id="chatContainer" class="content-area">
+        </div>
+
     <script>
-        const recordBtn = document.getElementById('recordBtn');
-        const status = document.getElementById('status');
-        const responseArea = document.getElementById('response-area');
+        const micBtn = document.getElementById('micBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusText = document.getElementById('status');
+        const chatContainer = document.getElementById('chatContainer');
 
-        // DEBUG: Check if browser supports it
-        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            alert("CRITICAL ERROR: Your browser does not support Voice. Please use Google Chrome.");
-        }
-
+        let isListening = false;
+        
+        //Speech recognition setup
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         
         recognition.lang = 'en-IN'; 
         recognition.interimResults = false;
 
-        // DEBUG: Verify button click works
-        recordBtn.onclick = () => {
-            console.log("Button Clicked");
-            try {
+        //Button events ---
+        micBtn.onclick = () => {
+            if (isListening) {
+                recognition.stop();
+            } else {
                 recognition.start();
-                status.innerText = "Listening... (Speak now!)";
-                recordBtn.classList.add('recording');
-            } catch (e) {
-                alert("Microphone Error: " + e.message);
             }
         };
 
-        recognition.onstart = () => {
-            console.log("Microphone is active");
+        //Stop Button
+        stopBtn.onclick = () => {
+            window.speechSynthesis.cancel();
+            if(isListening) recognition.stop()
+            setReadyState();
         };
 
-        recognition.onerror = (event) => {
-            console.error("Speech Error:", event.error);
-            alert("Browser Error: " + event.error); // This will tell us the exact problem
-            recordBtn.classList.remove('recording');
+        function setReadyState() {
+            micBtn.classList.remove('listening');
+            stopBtn.classList.remove('visible'); // Hide stop button
+            statusText.textContent = "Ready";
+            isListening = false;
+        }
+
+        recognition.onstart = () => {
+            isListening = true;
+            micBtn.classList.add('listening');
+            stopBtn.classList.add('visible'); // Show stop button
+            statusText.textContent = "Listening...";
+        };
+
+        recognition.onend = () => {
+            if (statusText.textContent === "Listening...") {
+                setReadyState();
+            }
         };
 
         recognition.onresult = async (event) => {
-            console.log("Voice captured");
             const transcript = event.results[0][0].transcript;
-            status.innerText = "Processing: " + transcript;
+            addMessage(transcript, 'user');
             
-            // Send to Backend
+            statusText.textContent = "Thinking...";
+            stopBtn.classList.add('visible'); // Keep stop button for cancelling thought
+
             try {
-                const response = await fetch("http://127.0.0.1:8000/process-voice", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: transcript })
+                const response = await fetch('/process-voice', {
+                    method: 'POST',
+                    body: new FormData(Object.assign(new FormData(), { 
+                        file: new Blob([transcript], { type: 'text/plain' }) 
+                    }))
                 });
+
                 const data = await response.json();
-                responseArea.innerText = data.reply;
-                responseArea.classList.add('visible');
                 
-                // Speak response
-                const utterance = new SpeechSynthesisUtterance(data.reply);
-                window.speechSynthesis.speak(utterance);
+                // Show Answer
+                addMessage(data.reply, 'agent');
+                statusText.textContent = "Speaking...";
                 
+                // Speak Answer
+                speak(data.reply);
+
             } catch (error) {
-                alert("Backend Error: Check your terminal!");
+                statusText.textContent = "Error: " + error.message;
+                setReadyState();
             }
-            recordBtn.classList.remove('recording');
         };
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = `message ${sender}-msg`;
+            div.textContent = text;
+            chatContainer.appendChild(div);
+            
+            // Auto-scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function speak(text) {
+            // Cancel any ongoing speech first
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Voice Selection
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => v.lang.includes('IN')) || voices[0];
+            if (preferredVoice) utterance.voice = preferredVoice;
+
+            utterance.onend = () => {
+                setReadyState();
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
     </script>
 </body>
 </html>
