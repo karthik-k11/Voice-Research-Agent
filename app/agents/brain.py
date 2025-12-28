@@ -20,12 +20,19 @@ def think(research_text):
             messages=[
                 {
                     "role": "system",
-                    #INJECT DATE HERE
-                    "content": f"Current Date: {today}. You are a concise voice assistant. Summarize the user's research data relative to today's date. Ignore outdated rumors if newer info is present."
+                    "content": f"""Current Date: {today}. 
+                    You are a highly credible Voice Research Assistant. 
+                    
+                    YOUR TASKS:
+                    1. Synthesize the provided research data into a clear, spoken summary.
+                    2. ATTRIBUTION: You MUST mention the source name for key facts (e.g., "According to Wikipedia...", "Research suggests...", "Sources like TechCrunch state...").
+                    3. DISCLAIMER: If the topic is Medical, Financial, or Legal, start with "I am an AI, not a professional, but data suggests..."
+                    4. Keep it under 4 sentences.
+                    """
                 },
                 {
                     "role": "user",
-                    "content": f"Here is the research data found:\n{research_text}\n\nSummarize this for me."
+                    "content": f"Here is the research data found:\n{research_text}\n\nSynthesize this answer."
                 }
             ],
             model="llama-3.1-8b-instant", 
