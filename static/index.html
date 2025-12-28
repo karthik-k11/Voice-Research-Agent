@@ -247,11 +247,12 @@
             
             addMessage(transcript, 'user');
             statusText.textContent = "Thinking...";
-            stopBtn.classList.add('visible'); // Keep stop btn visible
+            stopBtn.classList.add('visible');
 
             try {
+                //Send as simple Form Data
                 const formData = new FormData();
-                formData.append('file', new Blob([transcript], { type: 'text/plain' }), 'input.txt');
+                formData.append('text', transcript); 
 
                 const response = await fetch('/process-voice', {
                     method: 'POST',
