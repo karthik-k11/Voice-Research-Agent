@@ -85,7 +85,7 @@
             fill: white;
         }
 
-        /* STOP BUTTON */
+        /* Stop button */
         .stop-btn {
             width: 50px;
             height: 50px;
@@ -110,7 +110,7 @@
             display: flex; 
         }
 
-        /* Content Area */
+        /* Content area */
         .content-area {
             flex-grow: 1; 
             overflow-y: auto; 
@@ -196,9 +196,9 @@
         // Settings
         recognition.lang = 'en-IN'; // Indian English
         recognition.interimResults = false;
-        recognition.continuous = false; 
+        recognition.continuous = false; // Stop automatically after one phrase
 
-        //Button events
+        // Button events
         micBtn.onclick = () => {
             if (isListening) {
                 recognition.stop();
@@ -220,7 +220,7 @@
             isListening = false;
         }
 
-        //Recognition events
+        // Recognition events
         recognition.onstart = () => {
             isListening = true;
             micBtn.classList.add('listening');
@@ -251,7 +251,7 @@
 
             try {
                 const formData = new FormData();
-                formData.append('file', new Blob([transcript], { type: 'text/plain' }));
+                formData.append('file', new Blob([transcript], { type: 'text/plain' }), 'input.txt');
 
                 const response = await fetch('/process-voice', {
                     method: 'POST',
@@ -259,7 +259,8 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
+                    const errText = await response.text();
+                    throw new Error(`Server error (${response.status}): ${errText}`);
                 }
 
                 const data = await response.json();
@@ -271,25 +272,26 @@
             } catch (error) {
                 console.error("Fetch Error:", error);
                 statusText.textContent = "Error processing request";
-                addMessage("Error: Could not connect to server.", 'agent');
+                addMessage("Error: " + error.message, 'agent');
                 setReadyState();
             }
         };
 
-        // Helper Functions
         function addMessage(text, sender) {
             const div = document.createElement('div');
             div.className = `message ${sender}-msg`;
             div.textContent = text;
             chatContainer.appendChild(div);
-            chatContainer.scrollTop = chatContainer.scrollHeight; 
+            // Auto scroll to bottom
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 50);
         }
 
         function speak(text) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             
-            //Try to find a good voice
             const voices = window.speechSynthesis.getVoices();
             const preferredVoice = voices.find(v => v.lang.includes('IN')) || voices[0];
             if (preferredVoice) utterance.voice = preferredVoice;
