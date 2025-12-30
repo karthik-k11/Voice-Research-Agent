@@ -7,8 +7,10 @@ import uvicorn
 
 app = FastAPI()
 
-##Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+##Memory Storage
+chat_history = []
 
 @app.get("/")
 async def root():
@@ -17,18 +19,27 @@ async def root():
 @app.post("/process-voice")
 async def process_voice(text: str = Form(...)):
     try:
-        user_input = text 
+        user_input = text
         print(f"RECEIVED: {user_input}")
         
-        ##Plan
-        search_query = planner.extract_search_term(user_input)
+        ##PLAN with Context
+        search_query = planner.extract_search_term(user_input, chat_history)
         
-        ##Research
+        ##RESEARCH
         research_data = researcher.perform_research(search_query)
         
-        ##Think & Reply
+        ##THINK & REPLY
         response = brain.think(research_data)
         
+        ##UPDATE MEMORY
+        chat_history.append({"role": "user", "content": user_input})
+        chat_history.append({"role": "assistant", "content": response})
+        
+        # Keep memory short to save tokens
+        if len(chat_history) > 4:
+            chat_history.pop(0)
+            chat_history.pop(0)
+            
         print(f"REPLY: {response}")
         return {"reply": response}
         
