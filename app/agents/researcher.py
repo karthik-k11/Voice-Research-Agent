@@ -46,6 +46,7 @@ def search_web(query, max_results=3):
     except Exception as e:
         return f"Web search error: {e}"
 
+##End Function
 def perform_research(topic):
     wiki = search_wiki(topic)
     web = search_web(topic)
