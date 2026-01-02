@@ -32,6 +32,7 @@ def search_arxiv(query, max_results=2):
     except Exception as e:
         return f"ArXiv error: {e}"
 
+##Web search
 def search_web(query, max_results=3):
     print(f"Searching Web for: {query}")
     try:
