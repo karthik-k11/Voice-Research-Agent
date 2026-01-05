@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VARA | Research Agent</title>
+    <title>Jax | Research Agent</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent: #00d4ff;
-            --accent-glow: rgba(0, 212, 255, 0.4);
-            --text-main: #ffffff;
-            --text-secondary: #a0a0a0;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            /* Classy Titanium/Platinum Accent */
+            --accent: #e2e8f0; 
+            --accent-glow: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-secondary: #94a3b8;
         }
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: #050505;
+            /* Deep Matte Black Background */
+            background-color: #09090b; 
             color: var(--text-main);
             margin: 0;
             padding: 0;
@@ -32,69 +34,75 @@
         .bg-orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(80px);
+            filter: blur(100px);
             z-index: -1;
-            opacity: 0.6;
-            animation: float 10s infinite ease-in-out;
+            opacity: 0.4;
+            animation: float 15s infinite ease-in-out;
         }
 
         .orb-1 {
-            top: -10%;
-            left: -10%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, #4f46e5, #000);
+            top: -15%;
+            left: -15%;
+            width: 600px;
+            height: 600px;
+            /* Subtle Slate Grey Gradient */
+            background: radial-gradient(circle, #334155, #000); 
         }
 
         .orb-2 {
-            bottom: -10%;
-            right: -10%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, #db2777, #000);
+            bottom: -15%;
+            right: -15%;
+            width: 700px;
+            height: 700px;
+            /* Darker Charcoal Gradient */
+            background: radial-gradient(circle, #1e293b, #000); 
             animation-delay: -5s;
         }
 
         @keyframes float {
             0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(30px, 50px); }
+            50% { transform: translate(20px, 40px); }
         }
 
         .header {
-            padding: 20px 40px;
+            padding: 25px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(20px);
+            background: rgba(9, 9, 11, 0.6);
             z-index: 10;
         }
 
         .logo {
             font-weight: 600;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, #fff, #a5a5a5);
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            /* Metallic Text Effect */
+            background: linear-gradient(180deg, #fff, #94a3b8);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
         }
 
         .status-badge {
-            font-size: 0.85rem;
-            padding: 5px 12px;
-            border-radius: 20px;
+            font-size: 0.75rem;
+            padding: 6px 14px;
+            border-radius: 4px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
             transition: all 0.3s ease;
         }
 
         .status-badge.active {
-            color: var(--accent);
-            border-color: var(--accent);
-            box-shadow: 0 0 10px var(--accent-glow);
+            color: var(--text-main);
+            border-color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         /* Chat area */
@@ -104,20 +112,20 @@
             padding: 40px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
             scroll-behavior: smooth;
         }
 
         .message {
-            max-width: 80%;
-            padding: 15px 25px;
-            border-radius: 20px;
-            line-height: 1.6;
-            font-size: 1rem;
+            max-width: 85%;
+            padding: 18px 28px;
+            border-radius: 12px;
+            line-height: 1.7;
+            font-size: 1.05rem;
             position: relative;
             animation: slideUp 0.4s ease forwards;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(15px);
         }
 
         @keyframes slideUp {
@@ -126,64 +134,68 @@
 
         .user-msg {
             align-self: flex-end;
-            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            /* Classy Dark Grey for User */
+            background: #27272a; 
+            border: 1px solid #3f3f46;
             color: white;
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            border-bottom-right-radius: 2px;
         }
 
         .agent-msg {
             align-self: flex-start;
-            background: var(--glass-bg);
+            background: transparent;
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-            border-bottom-left-radius: 4px;
-            color: #e2e8f0;
+            border-left: 3px solid var(--text-secondary);
+            border-bottom-left-radius: 2px;
+            color: #d1d5db;
         }
 
         /* --- FOOTER CONTROLS --- */
         .controls-area {
-            padding: 30px;
+            padding: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            background: linear-gradient(to top, #000, transparent);
+            gap: 25px;
+            background: linear-gradient(to top, #09090b, transparent);
             z-index: 10;
         }
 
         /* THE GLOWING ORB BUTTON */
         .mic-wrapper {
             position: relative;
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         .mic-btn {
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            color: white;
-            font-size: 1.5rem;
+            /* Matte Black Button */
+            background: #18181b; 
+            border: 1px solid #27272a;
+            color: var(--text-secondary);
+            font-size: 1.4rem;
             cursor: pointer;
             z-index: 2;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .mic-btn:hover {
-            background: #2a2a2a;
-            transform: scale(1.1);
+            background: #27272a;
+            color: white;
+            transform: scale(1.05);
+            border-color: #52525b;
         }
 
-        /* Ripple Effect */
+        /* Ripple Effect (LISTENING MODE) */
         .ripple {
             position: absolute;
             width: 100%;
@@ -194,187 +206,11 @@
             z-index: 1;
         }
 
-        .mic-wrapper.listening .mic-btn {
-            background: var(--accent);
-            box-shadow: 0 0 20px var(--accent);
-            border-color: var(--accent);
-        }
-
-        .mic-wrapper.listening .ripple {
-            animation: ripple 1.5s infinite linear;
-        }
-
-        .mic-wrapper.listening .ripple:nth-child(2) {
-            animation-delay: 0.5s;
-        }
-
-        @keyframes ripple {
-            0% { transform: scale(0.8); opacity: 1; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
-
-        .stop-btn {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            color: #ef4444;
-            width: 50px;
-            height: 50px;
+        /* Buffering Effect (PROCESSING MODE) */
+        .buffer-ring {
+            position: absolute;
+            width: 110%;
+            height: 110%;
             border-radius: 50%;
-            cursor: pointer;
-            display: none; /* Hidden by default */
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            transition: all 0.3s;
-        }
-        
-        .stop-btn:hover {
-            background: #ef4444;
-            color: white;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
-        }
-
-        .stop-btn.visible {
-            display: flex;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-
-    </style>
-</head>
-<body>
-
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-
-    <div class="header">
-        <div class="logo">VARA // AGENT</div>
-        <div id="statusBadge" class="status-badge">System Ready</div>
-    </div>
-
-    <div id="chatContainer" class="chat-container">
-        <div class="message agent-msg">
-            Hello. I am VARA, your context-aware research assistant. Tap the orb to begin.
-        </div>
-    </div>
-
-    <div class="controls-area">
-        <button id="stopBtn" class="stop-btn">■</button>
-        
-        <div id="micWrapper" class="mic-wrapper">
-            <div class="ripple"></div>
-            <div class="ripple"></div>
-            <button id="micBtn" class="mic-btn">🎙️</button>
-        </div>
-    </div>
-
-    <script>
-        const micBtn = document.getElementById('micBtn');
-        const micWrapper = document.getElementById('micWrapper');
-        const stopBtn = document.getElementById('stopBtn');
-        const statusBadge = document.getElementById('statusBadge');
-        const chatContainer = document.getElementById('chatContainer');
-
-        let isListening = false;
-        
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        
-        recognition.lang = 'en-IN';
-        recognition.interimResults = false;
-        recognition.continuous = false;
-
-        // --- UI UPDATES ---
-        function setStatus(text, isActive) {
-            statusBadge.textContent = text;
-            if (isActive) statusBadge.classList.add('active');
-            else statusBadge.classList.remove('active');
-        }
-
-        function setListeningUI(listening) {
-            isListening = listening;
-            if (listening) {
-                micWrapper.classList.add('listening');
-                stopBtn.classList.add('visible');
-                setStatus("Listening...", true);
-            } else {
-                micWrapper.classList.remove('listening');
-                stopBtn.classList.remove('visible');
-                setStatus("System Ready", false);
-            }
-        }
-
-        // --- BUTTON EVENTS ---
-        micBtn.onclick = () => {
-            if (isListening) recognition.stop();
-            else recognition.start();
-        };
-
-        stopBtn.onclick = () => {
-            window.speechSynthesis.cancel();
-            if(isListening) recognition.stop();
-            setListeningUI(false);
-        };
-
-        // --- RECOGNITION LOGIC ---
-        recognition.onstart = () => setListeningUI(true);
-        recognition.onend = () => {
-            if (statusBadge.textContent === "Listening...") setListeningUI(false);
-        };
-
-        recognition.onresult = async (event) => {
-            const transcript = event.results[0][0].transcript;
-            addMessage(transcript, 'user');
-            
-            setStatus("Processing Data...", true);
-            stopBtn.classList.add('visible'); // Allow stop while thinking
-
-            try {
-                const formData = new FormData();
-                formData.append('text', transcript); // The specific "text" key fix
-
-                const response = await fetch('/process-voice', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error("Server connection failed");
-
-                const data = await response.json();
-                
-                addMessage(data.reply, 'agent');
-                setStatus("Synthesizing Speech...", true);
-                speak(data.reply);
-
-            } catch (error) {
-                addMessage("Error: " + error.message, 'agent');
-                setListeningUI(false);
-            }
-        };
-
-        function addMessage(text, sender) {
-            const div = document.createElement('div');
-            div.className = `message ${sender}-msg`;
-            div.textContent = text;
-            chatContainer.appendChild(div);
-            setTimeout(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 50);
-        }
-
-        function speak(text) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            const voices = window.speechSynthesis.getVoices();
-            const preferredVoice = voices.find(v => v.lang.includes('IN')) || voices[0];
-            if (preferredVoice) utterance.voice = preferredVoice;
-
-            utterance.onend = () => setListeningUI(false);
-            window.speechSynthesis.speak(utterance);
-        }
-    </script>
-</body>
-</html>
+            border: 2px solid transparent;
+            border
