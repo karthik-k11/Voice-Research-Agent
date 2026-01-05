@@ -213,4 +213,259 @@
             height: 110%;
             border-radius: 50%;
             border: 2px solid transparent;
-            border
+            border-top-color: var(--text-secondary);
+            opacity: 0;
+            z-index: 1;
+            transition: opacity 0.3s;
+        }
+
+        /* --- STATE STYLES --- */
+        
+        /* 1. Listening State (Active Ripple) */
+        .mic-wrapper.listening .mic-btn {
+            background: var(--accent);
+            color: #000; /* Black icon on white button */
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .mic-wrapper.listening .ripple {
+            animation: ripple 2s infinite cubic-bezier(0, 0.2, 0.8, 1);
+        }
+
+        .mic-wrapper.listening .ripple:nth-child(2) {
+            animation-delay: 0.6s;
+        }
+
+        /* 2. Processing/Buffering State (Rotating Ring, No Ripple) */
+        .mic-wrapper.processing .mic-btn {
+            background: #27272a;
+            color: white;
+            border-color: #52525b;
+            transform: scale(0.95);
+        }
+
+        .mic-wrapper.processing .buffer-ring {
+            opacity: 1;
+            animation: spin 1.5s linear infinite;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0.8); opacity: 0.8; border-width: 2px; }
+            100% { transform: scale(2.2); opacity: 0; border-width: 0px; }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stop-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .stop-btn:hover {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
+        }
+
+        .stop-btn.visible {
+            display: flex;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <div class="header">
+        <div class="logo">JAX // AGENT</div>
+        <div id="statusBadge" class="status-badge">Standby</div>
+    </div>
+
+    <div id="chatContainer" class="chat-container">
+        <div class="message agent-msg">
+            Hello. I am Jax. Ready when you are.
+        </div>
+    </div>
+
+    <div class="controls-area">
+        <button id="stopBtn" class="stop-btn">✕</button>
+        
+        <div id="micWrapper" class="mic-wrapper">
+            <div class="ripple"></div>
+            <div class="ripple"></div>
+            <div class="buffer-ring"></div> 
+            <button id="micBtn" class="mic-btn">🎙️</button>
+        </div>
+    </div>
+
+    <script>
+        const micBtn = document.getElementById('micBtn');
+        const micWrapper = document.getElementById('micWrapper');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusBadge = document.getElementById('statusBadge');
+        const chatContainer = document.getElementById('chatContainer');
+
+        let isListening = false;
+        
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        
+        recognition.lang = 'en-IN';
+        recognition.interimResults = false;
+        recognition.continuous = false;
+
+        // --- UI UPDATES ---
+        function setStatus(text, isActive) {
+            statusBadge.textContent = text;
+            if (isActive) statusBadge.classList.add('active');
+            else statusBadge.classList.remove('active');
+        }
+
+        // Logic for Switching States
+        function setVisualState(state) {
+            // Reset all states first
+            micWrapper.classList.remove('listening', 'processing');
+            stopBtn.classList.remove('visible');
+
+            if (state === 'listening') {
+                isListening = true;
+                micWrapper.classList.add('listening');
+                stopBtn.classList.add('visible');
+                setStatus("Listening", true);
+            } 
+            else if (state === 'processing') {
+                // Buffering/Thinking mode (Not blue, just grey spinner)
+                isListening = false;
+                micWrapper.classList.add('processing'); 
+                stopBtn.classList.add('visible'); // Allow stop while thinking/speaking
+                setStatus("Processing", true);
+            }
+            else {
+                // Idle / Normal Mode
+                isListening = false;
+                setStatus("Standby", false);
+            }
+        }
+
+        // --- BUTTON EVENTS ---
+        micBtn.onclick = () => {
+            if (isListening) recognition.stop();
+            else recognition.start();
+        };
+
+        stopBtn.onclick = () => {
+            window.speechSynthesis.cancel();
+            if(isListening) recognition.stop();
+            setVisualState('idle');
+        };
+
+        // --- RECOGNITION LOGIC ---
+        recognition.onstart = () => setVisualState('listening');
+        
+        recognition.onend = () => {
+            // If we simply stopped listening and haven't started processing yet
+            if (statusBadge.textContent === "Listening") setVisualState('idle');
+        };
+
+        recognition.onresult = async (event) => {
+            const transcript = event.results[0][0].transcript;
+            addMessage(transcript, 'user');
+            
+            // IMMEDIATE SWITCH: Stop Listening UI, Start Processing UI
+            setVisualState('processing');
+
+            try {
+                const formData = new FormData();
+                formData.append('text', transcript); // The specific "text" key fix
+
+                const response = await fetch('/process-voice', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Server connection failed");
+
+                const data = await response.json();
+                
+                // Add Metadata if available (Glass Box Feature)
+                addMessage(data.reply, 'agent', data.metadata);
+                
+                setStatus("Speaking", true);
+                speak(data.reply);
+
+            } catch (error) {
+                addMessage("Error: " + error.message, 'agent');
+                setVisualState('idle');
+            }
+        };
+
+        function addMessage(text, sender, metadata = null) {
+            const div = document.createElement('div');
+            div.className = `message ${sender}-msg`;
+            
+            // --- GLASS BOX METADATA DISPLAY ---
+            if (sender === 'agent' && metadata && metadata.query) {
+                const metaDiv = document.createElement('div');
+                metaDiv.style.fontSize = '0.75rem';
+                metaDiv.style.marginBottom = '10px';
+                metaDiv.style.color = '#94a3b8'; // Muted text
+                metaDiv.style.display = 'flex';
+                metaDiv.style.alignItems = 'center';
+                metaDiv.style.gap = '8px';
+                metaDiv.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                metaDiv.style.paddingBottom = '8px';
+                
+                metaDiv.innerHTML = `
+                    <span style="color: var(--accent);">◆ INTENT:</span> 
+                    <span style="font-family: monospace; letter-spacing: 0.5px;">
+                        ${metadata.query}
+                    </span>
+                `;
+                div.appendChild(metaDiv);
+            }
+
+            const textNode = document.createElement('div');
+            textNode.textContent = text;
+            div.appendChild(textNode);
+
+            chatContainer.appendChild(div);
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 50);
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => v.lang.includes('IN')) || voices[0];
+            if (preferredVoice) utterance.voice = preferredVoice;
+
+            utterance.onend = () => setVisualState('idle'); // Back to normal after speaking
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>
