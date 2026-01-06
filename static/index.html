@@ -288,21 +288,19 @@
 
         let isListening = false;
         
-        // --- Robust Speech Recognition Setup ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
         if (!SpeechRecognition) {
-            alert("Your browser does not support Voice Recognition. Please use Chrome or Edge.");
+            alert("Your browser does not support Voice Recognition.");
         }
 
         const recognition = new SpeechRecognition();
         recognition.lang = 'en-IN';
         recognition.interimResults = false;
-        recognition.continuous = false; // Stop after one sentence
+        recognition.continuous = false; 
 
         // --- UI STATES ---
         function setVisualState(state) {
-            // Clear previous states
             micWrapper.classList.remove('listening', 'processing');
             stopBtn.classList.remove('visible');
 
@@ -332,14 +330,14 @@
 
         // --- EVENTS ---
         micBtn.onclick = (e) => {
-            e.preventDefault(); // Prevent double triggers
+            e.preventDefault();
             if (isListening) {
                 recognition.stop();
             } else {
                 try {
                     recognition.start();
                 } catch (err) {
-                    console.log("Mic already started:", err);
+                    console.log("Mic error:", err);
                 }
             }
         };
@@ -351,17 +349,11 @@
             setVisualState('idle');
         };
 
-        // --- RECOGNITION HANDLERS ---
-        
         recognition.onstart = () => {
-            console.log("Mic started");
             setVisualState('listening');
         };
 
         recognition.onend = () => {
-            console.log("Mic ended");
-            // Only reset if we are NOT processing (i.e. if we didn't get a result yet)
-            // If we got a result, the visual state is already 'processing', so don't reset to 'idle'
             if (statusBadge.textContent === "Listening") {
                 setVisualState('idle'); 
             }
@@ -369,27 +361,18 @@
 
         recognition.onerror = (event) => {
             console.error("Speech Error:", event.error);
-            
-            if (event.error === 'no-speech') {
-                // Don't show an error message, just reset quietly or ask to try again
-                setVisualState('idle');
-                // Optional: addMessage("I didn't hear anything.", 'agent');
-            } else if (event.error === 'not-allowed') {
-                addMessage("Error: Microphone access denied.", 'agent');
-                setVisualState('idle');
-            } else {
-                addMessage("Error: " + event.error, 'agent');
-                setVisualState('idle');
+            if (event.error !== 'no-speech') {
+                 addMessage("Error: " + event.error, 'agent');
             }
+            setVisualState('idle');
         };
 
         recognition.onresult = async (event) => {
             const transcript = event.results[0][0].transcript;
-            console.log("Transcript:", transcript);
             
             addMessage(transcript, 'user');
             
-            // Switch to Processing State immediately
+            // Start Buffering Animation
             setVisualState('processing');
 
             try {
@@ -405,10 +388,15 @@
 
                 const data = await response.json();
                 
-                // Show Metadata
+                // 1. Show Text immediately
                 addMessage(data.reply, 'agent', data.metadata);
                 
-                setStatus("Speaking", true);
+                // 2. STOP ANIMATION IMMEDIATELY (Reset Orb)
+                // This stops the buffering ring as soon as text appears.
+                setVisualState('idle'); 
+                setStatus("Speaking", true); // Optional: update status text only
+
+                // 3. Start Voice
                 speak(data.reply);
 
             } catch (error) {
@@ -421,7 +409,6 @@
             const div = document.createElement('div');
             div.className = `message ${sender}-msg`;
             
-            // Metadata Display
             if (sender === 'agent' && metadata && metadata.query) {
                 const metaDiv = document.createElement('div');
                 metaDiv.style.fontSize = '0.75rem';
@@ -449,7 +436,7 @@
             const preferredVoice = voices.find(v => v.lang.includes('IN')) || voices[0];
             if (preferredVoice) utterance.voice = preferredVoice;
 
-            utterance.onend = () => setVisualState('idle');
+            // No visual reset needed here since we already did it
             window.speechSynthesis.speak(utterance);
         }
     </script>
