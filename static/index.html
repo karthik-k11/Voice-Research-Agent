@@ -10,18 +10,17 @@
 
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            /* Classy Titanium/Platinum Accent */
-            --accent: #e2e8f0; 
-            --accent-glow: rgba(255, 255, 255, 0.15);
-            --text-main: #f8fafc;
-            --text-secondary: #94a3b8;
+            /* TITANIUM THEME VARIABLES */
+            --bg-color: #09090b;  /* Deep Matte Black */
+            --card-bg: #18181b;   /* Dark Grey Card */
+            --text-main: #f8fafc; /* White Text */
+            --text-muted: #94a3b8; /* Muted Grey */
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
+
         body {
             font-family: 'Outfit', sans-serif;
-            /* Deep Matte Black Background */
-            background-color: #09090b; 
+            background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 0;
@@ -31,39 +30,39 @@
             flex-direction: column;
         }
 
+        /* --- BACKGROUND ATMOSPHERE --- */
         .bg-orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(100px);
+            filter: blur(120px);
             z-index: -1;
-            opacity: 0.4;
-            animation: float 15s infinite ease-in-out;
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
         }
 
         .orb-1 {
-            top: -15%;
-            left: -15%;
-            width: 600px;
-            height: 600px;
-            /* Subtle Slate Grey Gradient */
+            top: -20%;
+            left: -20%;
+            width: 800px;
+            height: 800px;
             background: radial-gradient(circle, #334155, #000); 
         }
 
         .orb-2 {
-            bottom: -15%;
-            right: -15%;
-            width: 700px;
-            height: 700px;
-            /* Darker Charcoal Gradient */
-            background: radial-gradient(circle, #1e293b, #000); 
+            bottom: -20%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, #475569, #000);
             animation-delay: -5s;
         }
 
         @keyframes float {
             0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(20px, 40px); }
+            50% { transform: translate(30px, 50px); }
         }
 
+        /* --- HEADER --- */
         .header {
             padding: 25px 40px;
             display: flex;
@@ -71,29 +70,25 @@
             align-items: center;
             border-bottom: 1px solid var(--glass-border);
             backdrop-filter: blur(20px);
-            background: rgba(9, 9, 11, 0.6);
+            background: rgba(9, 9, 11, 0.7);
             z-index: 10;
         }
 
         .logo {
             font-weight: 600;
             font-size: 1.1rem;
-            letter-spacing: 2px;
-            /* Metallic Text Effect */
-            background: linear-gradient(180deg, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            letter-spacing: 3px;
             text-transform: uppercase;
+            color: var(--text-main);
         }
 
         .status-badge {
-            font-size: 0.75rem;
-            padding: 6px 14px;
+            font-size: 0.7rem;
+            padding: 6px 12px;
             border-radius: 4px;
-            background: var(--glass-bg);
+            background: rgba(255,255,255,0.05);
             border: 1px solid var(--glass-border);
-            color: var(--text-secondary);
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s ease;
@@ -102,10 +97,10 @@
         .status-badge.active {
             color: var(--text-main);
             border-color: var(--text-main);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Chat area */
+        /* --- CHAT AREA --- */
         .chat-container {
             flex-grow: 1;
             overflow-y: auto;
@@ -118,10 +113,10 @@
 
         .message {
             max-width: 85%;
-            padding: 18px 28px;
-            border-radius: 12px;
+            padding: 20px 30px;
+            border-radius: 4px;
             line-height: 1.7;
-            font-size: 1.05rem;
+            font-size: 1rem;
             position: relative;
             animation: slideUp 0.4s ease forwards;
             opacity: 0;
@@ -134,20 +129,17 @@
 
         .user-msg {
             align-self: flex-end;
-            /* Classy Dark Grey for User */
             background: #27272a; 
             border: 1px solid #3f3f46;
             color: white;
-            border-bottom-right-radius: 2px;
         }
 
         .agent-msg {
             align-self: flex-start;
             background: transparent;
-            border: 1px solid var(--glass-border);
-            border-left: 3px solid var(--text-secondary);
-            border-bottom-left-radius: 2px;
-            color: #d1d5db;
+            border-left: 2px solid var(--text-muted);
+            padding-left: 20px;
+            color: #cbd5e1;
         }
 
         /* --- FOOTER CONTROLS --- */
@@ -157,29 +149,27 @@
             justify-content: center;
             align-items: center;
             gap: 25px;
-            background: linear-gradient(to top, #09090b, transparent);
+            background: linear-gradient(to top, var(--bg-color), transparent);
             z-index: 10;
         }
 
-        /* THE GLOWING ORB BUTTON */
         .mic-wrapper {
             position: relative;
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         .mic-btn {
-            width: 64px;
-            height: 64px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            /* Matte Black Button */
-            background: #18181b; 
-            border: 1px solid #27272a;
-            color: var(--text-secondary);
-            font-size: 1.4rem;
+            background: var(--card-bg);
+            border: 1px solid #3f3f46;
+            color: var(--text-muted);
+            font-size: 1.5rem;
             cursor: pointer;
             z-index: 2;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -191,69 +181,41 @@
         .mic-btn:hover {
             background: #27272a;
             color: white;
-            transform: scale(1.05);
             border-color: #52525b;
         }
 
-        /* Ripple Effect (LISTENING MODE) */
-        .ripple {
+        /* STATE: LISTENING */
+        .mic-wrapper.listening .mic-btn {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+        }
+
+        /* STATE: PROCESSING */
+        .mic-wrapper.processing .mic-btn {
+            background: var(--card-bg);
+            color: var(--text-muted);
+            transform: scale(0.9);
+            border-color: var(--text-muted);
+        }
+
+        .buffer-ring {
             position: absolute;
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 1px solid var(--accent);
-            opacity: 0;
-            z-index: 1;
-        }
-
-        /* Buffering Effect (PROCESSING MODE) */
-        .buffer-ring {
-            position: absolute;
-            width: 110%;
-            height: 110%;
-            border-radius: 50%;
             border: 2px solid transparent;
-            border-top-color: var(--text-secondary);
+            border-top-color: var(--text-muted);
             opacity: 0;
             z-index: 1;
             transition: opacity 0.3s;
         }
 
-        /* --- STATE STYLES --- */
-        
-        /* 1. Listening State (Active Ripple) */
-        .mic-wrapper.listening .mic-btn {
-            background: var(--accent);
-            color: #000; /* Black icon on white button */
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-            border-color: var(--accent);
-            transform: scale(1.1);
-        }
-
-        .mic-wrapper.listening .ripple {
-            animation: ripple 2s infinite cubic-bezier(0, 0.2, 0.8, 1);
-        }
-
-        .mic-wrapper.listening .ripple:nth-child(2) {
-            animation-delay: 0.6s;
-        }
-
-        /* 2. Processing/Buffering State (Rotating Ring, No Ripple) */
-        .mic-wrapper.processing .mic-btn {
-            background: #27272a;
-            color: white;
-            border-color: #52525b;
-            transform: scale(0.95);
-        }
-
         .mic-wrapper.processing .buffer-ring {
             opacity: 1;
-            animation: spin 1.5s linear infinite;
-        }
-
-        @keyframes ripple {
-            0% { transform: scale(0.8); opacity: 0.8; border-width: 2px; }
-            100% { transform: scale(2.2); opacity: 0; border-width: 0px; }
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
@@ -262,24 +224,23 @@
         }
 
         .stop-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-secondary);
+            background: transparent;
+            border: 1px solid #3f3f46;
+            color: var(--text-muted);
             width: 45px;
             height: 45px;
             border-radius: 50%;
             cursor: pointer;
-            display: none; /* Hidden by default */
+            display: none;
             align-items: center;
             justify-content: center;
             font-size: 1rem;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
         
         .stop-btn:hover {
-            background: #ef4444;
             border-color: #ef4444;
-            color: white;
+            color: #ef4444;
         }
 
         .stop-btn.visible {
@@ -287,8 +248,8 @@
         }
 
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; }
         ::-webkit-scrollbar-track { background: transparent; }
 
     </style>
@@ -299,13 +260,13 @@
     <div class="bg-orb orb-2"></div>
 
     <div class="header">
-        <div class="logo">JAX // AGENT</div>
+        <div class="logo">JAX // RESEARCH</div>
         <div id="statusBadge" class="status-badge">Standby</div>
     </div>
 
     <div id="chatContainer" class="chat-container">
         <div class="message agent-msg">
-            Hello. I am Jax. Ready when you are.
+            I am Jax. Ready to research.
         </div>
     </div>
 
@@ -313,8 +274,6 @@
         <button id="stopBtn" class="stop-btn">✕</button>
         
         <div id="micWrapper" class="mic-wrapper">
-            <div class="ripple"></div>
-            <div class="ripple"></div>
             <div class="buffer-ring"></div> 
             <button id="micBtn" class="mic-btn">🎙️</button>
         </div>
@@ -329,23 +288,21 @@
 
         let isListening = false;
         
+        // --- Robust Speech Recognition Setup ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
         
-        recognition.lang = 'en-IN';
-        recognition.interimResults = false;
-        recognition.continuous = false;
-
-        // --- UI UPDATES ---
-        function setStatus(text, isActive) {
-            statusBadge.textContent = text;
-            if (isActive) statusBadge.classList.add('active');
-            else statusBadge.classList.remove('active');
+        if (!SpeechRecognition) {
+            alert("Your browser does not support Voice Recognition. Please use Chrome or Edge.");
         }
 
-        // Logic for Switching States
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-IN';
+        recognition.interimResults = false;
+        recognition.continuous = false; // Stop after one sentence
+
+        // --- UI STATES ---
         function setVisualState(state) {
-            // Reset all states first
+            // Clear previous states
             micWrapper.classList.remove('listening', 'processing');
             stopBtn.classList.remove('visible');
 
@@ -356,60 +313,99 @@
                 setStatus("Listening", true);
             } 
             else if (state === 'processing') {
-                // Buffering/Thinking mode (Not blue, just grey spinner)
                 isListening = false;
                 micWrapper.classList.add('processing'); 
-                stopBtn.classList.add('visible'); // Allow stop while thinking/speaking
+                stopBtn.classList.add('visible');
                 setStatus("Processing", true);
             }
             else {
-                // Idle / Normal Mode
                 isListening = false;
                 setStatus("Standby", false);
             }
         }
 
-        // --- BUTTON EVENTS ---
-        micBtn.onclick = () => {
-            if (isListening) recognition.stop();
-            else recognition.start();
+        function setStatus(text, isActive) {
+            statusBadge.textContent = text;
+            if (isActive) statusBadge.classList.add('active');
+            else statusBadge.classList.remove('active');
+        }
+
+        // --- EVENTS ---
+        micBtn.onclick = (e) => {
+            e.preventDefault(); // Prevent double triggers
+            if (isListening) {
+                recognition.stop();
+            } else {
+                try {
+                    recognition.start();
+                } catch (err) {
+                    console.log("Mic already started:", err);
+                }
+            }
         };
 
-        stopBtn.onclick = () => {
+        stopBtn.onclick = (e) => {
+            e.preventDefault();
             window.speechSynthesis.cancel();
             if(isListening) recognition.stop();
             setVisualState('idle');
         };
 
-        // --- RECOGNITION LOGIC ---
-        recognition.onstart = () => setVisualState('listening');
+        // --- RECOGNITION HANDLERS ---
         
+        recognition.onstart = () => {
+            console.log("Mic started");
+            setVisualState('listening');
+        };
+
         recognition.onend = () => {
-            // If we simply stopped listening and haven't started processing yet
-            if (statusBadge.textContent === "Listening") setVisualState('idle');
+            console.log("Mic ended");
+            // Only reset if we are NOT processing (i.e. if we didn't get a result yet)
+            // If we got a result, the visual state is already 'processing', so don't reset to 'idle'
+            if (statusBadge.textContent === "Listening") {
+                setVisualState('idle'); 
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech Error:", event.error);
+            
+            if (event.error === 'no-speech') {
+                // Don't show an error message, just reset quietly or ask to try again
+                setVisualState('idle');
+                // Optional: addMessage("I didn't hear anything.", 'agent');
+            } else if (event.error === 'not-allowed') {
+                addMessage("Error: Microphone access denied.", 'agent');
+                setVisualState('idle');
+            } else {
+                addMessage("Error: " + event.error, 'agent');
+                setVisualState('idle');
+            }
         };
 
         recognition.onresult = async (event) => {
             const transcript = event.results[0][0].transcript;
+            console.log("Transcript:", transcript);
+            
             addMessage(transcript, 'user');
             
-            // IMMEDIATE SWITCH: Stop Listening UI, Start Processing UI
+            // Switch to Processing State immediately
             setVisualState('processing');
 
             try {
                 const formData = new FormData();
-                formData.append('text', transcript); // The specific "text" key fix
+                formData.append('text', transcript);
 
                 const response = await fetch('/process-voice', {
                     method: 'POST',
                     body: formData
                 });
 
-                if (!response.ok) throw new Error("Server connection failed");
+                if (!response.ok) throw new Error("Server error");
 
                 const data = await response.json();
                 
-                // Add Metadata if available (Glass Box Feature)
+                // Show Metadata
                 addMessage(data.reply, 'agent', data.metadata);
                 
                 setStatus("Speaking", true);
@@ -425,24 +421,14 @@
             const div = document.createElement('div');
             div.className = `message ${sender}-msg`;
             
-            // --- GLASS BOX METADATA DISPLAY ---
+            // Metadata Display
             if (sender === 'agent' && metadata && metadata.query) {
                 const metaDiv = document.createElement('div');
                 metaDiv.style.fontSize = '0.75rem';
                 metaDiv.style.marginBottom = '10px';
-                metaDiv.style.color = '#94a3b8'; // Muted text
-                metaDiv.style.display = 'flex';
-                metaDiv.style.alignItems = 'center';
-                metaDiv.style.gap = '8px';
-                metaDiv.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-                metaDiv.style.paddingBottom = '8px';
-                
-                metaDiv.innerHTML = `
-                    <span style="color: var(--accent);">◆ INTENT:</span> 
-                    <span style="font-family: monospace; letter-spacing: 0.5px;">
-                        ${metadata.query}
-                    </span>
-                `;
+                metaDiv.style.color = '#64748b';
+                metaDiv.style.fontFamily = 'monospace';
+                metaDiv.textContent = `> INTENT: ${metadata.query}`;
                 div.appendChild(metaDiv);
             }
 
@@ -463,7 +449,7 @@
             const preferredVoice = voices.find(v => v.lang.includes('IN')) || voices[0];
             if (preferredVoice) utterance.voice = preferredVoice;
 
-            utterance.onend = () => setVisualState('idle'); // Back to normal after speaking
+            utterance.onend = () => setVisualState('idle');
             window.speechSynthesis.speak(utterance);
         }
     </script>
