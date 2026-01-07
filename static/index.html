@@ -392,9 +392,8 @@
                 addMessage(data.reply, 'agent', data.metadata);
                 
                 // 2. STOP ANIMATION IMMEDIATELY (Reset Orb)
-                // This stops the buffering ring as soon as text appears.
                 setVisualState('idle'); 
-                setStatus("Speaking", true); // Optional: update status text only
+                setStatus("Speaking", true); 
 
                 // 3. Start Voice
                 speak(data.reply);
