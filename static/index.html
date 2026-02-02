@@ -318,7 +318,8 @@
             }
             else {
                 isListening = false;
-                setStatus("Standby", false);
+                // Important: Only reset status text if we are genuinely going to Standby
+                // We handle 'Speaking' status manually in the speak() function
             }
         }
 
@@ -346,6 +347,7 @@
             e.preventDefault();
             window.speechSynthesis.cancel();
             if(isListening) recognition.stop();
+            setStatus("Standby", false);
             setVisualState('idle');
         };
 
@@ -354,8 +356,10 @@
         };
 
         recognition.onend = () => {
+            // Only go to idle if we were listening and NOT processing results yet
             if (statusBadge.textContent === "Listening") {
                 setVisualState('idle'); 
+                setStatus("Standby", false);
             }
         };
 
@@ -365,14 +369,13 @@
                  addMessage("Error: " + event.error, 'agent');
             }
             setVisualState('idle');
+            setStatus("Standby", false);
         };
 
         recognition.onresult = async (event) => {
             const transcript = event.results[0][0].transcript;
             
             addMessage(transcript, 'user');
-            
-            // Start Buffering Animation
             setVisualState('processing');
 
             try {
@@ -391,16 +394,19 @@
                 // 1. Show Text immediately
                 addMessage(data.reply, 'agent', data.metadata);
                 
-                // 2. STOP ANIMATION IMMEDIATELY (Reset Orb)
+                // 2. STOP ANIMATION (Visual Idle)
                 setVisualState('idle'); 
+                
+                // 3. SET STATUS TO SPEAKING
                 setStatus("Speaking", true); 
 
-                // 3. Start Voice
+                // 4. Start Voice
                 speak(data.reply);
 
             } catch (error) {
                 addMessage("Error: " + error.message, 'agent');
                 setVisualState('idle');
+                setStatus("Standby", false);
             }
         };
 
@@ -435,7 +441,16 @@
             const preferredVoice = voices.find(v => v.lang.includes('IN')) || voices[0];
             if (preferredVoice) utterance.voice = preferredVoice;
 
-            // No visual reset needed here since we already did it
+            // --- THE FIX ---
+            // When speech ends, force the status text back to Standby
+            utterance.onend = () => {
+                setStatus("Standby", false);
+            };
+            
+            utterance.onerror = () => {
+                setStatus("Standby", false);
+            };
+
             window.speechSynthesis.speak(utterance);
         }
     </script>
