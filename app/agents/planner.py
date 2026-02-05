@@ -10,8 +10,11 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def extract_search_term(user_input, history=[]):
     print(f"PLANNER: Analyzing intent for '{user_input}'...")
+
+    if not user_input or len(user_input.strip()) < 5:
+        print("PLANNER: Input too short, asking for clarification.")
+        return None
     
-    # Only use the LAST exchange to avoid confusing the AI with old topics
     short_history = history[-2:] if history else []
     
     context_str = ""
