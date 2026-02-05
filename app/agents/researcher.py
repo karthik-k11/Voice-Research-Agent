@@ -51,4 +51,10 @@ def search_web(query, max_results=3):
 def perform_research(topic):
     wiki = search_wiki(topic)
     web = search_web(topic)
-    return f"TOPIC: {topic}\n\nSOURCE 1: WIKIPEDIA\n{wiki}\n\nSOURCE 2: WEB\n{web}"
+    arxiv_data = search_arxiv(topic)
+
+    return {
+        "WIKIPEDIA": wiki,
+        "WEB": web,
+        "ARXIV": arxiv_data
+    }
