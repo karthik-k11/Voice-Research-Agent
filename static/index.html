@@ -10,11 +10,10 @@
 
     <style>
         :root {
-            /* TITANIUM THEME VARIABLES */
-            --bg-color: #09090b;  /* Deep Matte Black */
-            --card-bg: #18181b;   /* Dark Grey Card */
-            --text-main: #f8fafc; /* White Text */
-            --text-muted: #94a3b8; /* Muted Grey */
+            --bg-color: #09090b;  
+            --card-bg: #18181b;   
+            --text-main: #f8fafc; 
+            --text-muted: #94a3b8; 
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
@@ -30,7 +29,6 @@
             flex-direction: column;
         }
 
-        /* --- BACKGROUND ATMOSPHERE --- */
         .bg-orb {
             position: absolute;
             border-radius: 50%;
@@ -62,7 +60,6 @@
             50% { transform: translate(30px, 50px); }
         }
 
-        /* --- HEADER --- */
         .header {
             padding: 25px 40px;
             display: flex;
@@ -100,7 +97,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* --- CHAT AREA --- */
         .chat-container {
             flex-grow: 1;
             overflow-y: auto;
@@ -142,7 +138,6 @@
             color: #cbd5e1;
         }
 
-        /* --- FOOTER CONTROLS --- */
         .controls-area {
             padding: 40px;
             display: flex;
@@ -184,7 +179,6 @@
             border-color: #52525b;
         }
 
-        /* STATE: LISTENING */
         .mic-wrapper.listening .mic-btn {
             background: #fff;
             color: #000;
@@ -193,7 +187,6 @@
             box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
         }
 
-        /* STATE: PROCESSING */
         .mic-wrapper.processing .mic-btn {
             background: var(--card-bg);
             color: var(--text-muted);
@@ -247,7 +240,6 @@
             display: flex;
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #333; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -280,6 +272,7 @@
     </div>
 
     <script>
+        let aborted = false;
         const micBtn = document.getElementById('micBtn');
         const micWrapper = document.getElementById('micWrapper');
         const stopBtn = document.getElementById('stopBtn');
@@ -299,7 +292,6 @@
         recognition.interimResults = false;
         recognition.continuous = false; 
 
-        // --- UI STATES ---
         function setVisualState(state) {
             micWrapper.classList.remove('listening', 'processing');
             stopBtn.classList.remove('visible');
@@ -318,8 +310,7 @@
             }
             else {
                 isListening = false;
-                // Important: Only reset status text if we are genuinely going to Standby
-                // We handle 'Speaking' status manually in the speak() function
+               
             }
         }
 
@@ -329,7 +320,6 @@
             else statusBadge.classList.remove('active');
         }
 
-        // --- EVENTS ---
         micBtn.onclick = (e) => {
             e.preventDefault();
             if (isListening) {
@@ -344,19 +334,20 @@
         };
 
         stopBtn.onclick = (e) => {
-            e.preventDefault();
-            window.speechSynthesis.cancel();
-            if(isListening) recognition.stop();
-            setStatus("Standby", false);
-            setVisualState('idle');
+        e.preventDefault();
+        aborted = true;
+        window.speechSynthesis.cancel();
+        if (isListening) recognition.stop();
+        setStatus("Standby", false);
+        setVisualState('idle');
         };
+
 
         recognition.onstart = () => {
             setVisualState('listening');
         };
 
         recognition.onend = () => {
-            // Only go to idle if we were listening and NOT processing results yet
             if (statusBadge.textContent === "Listening") {
                 setVisualState('idle'); 
                 setStatus("Standby", false);
@@ -374,6 +365,14 @@
 
         recognition.onresult = async (event) => {
             const transcript = event.results[0][0].transcript;
+
+            if (!transcript || transcript.trim().length < 5) {
+            console.warn("Ignored short / invalid input:", transcript);
+            setStatus("Standby", false);
+            setVisualState('idle');
+            return;
+        }
+
             
             addMessage(transcript, 'user');
             setVisualState('processing');
@@ -390,17 +389,18 @@
                 if (!response.ok) throw new Error("Server error");
 
                 const data = await response.json();
+
+                if (aborted) {
+                aborted = false;
+                return;
+                }
                 
-                // 1. Show Text immediately
                 addMessage(data.reply, 'agent', data.metadata);
                 
-                // 2. STOP ANIMATION (Visual Idle)
                 setVisualState('idle'); 
                 
-                // 3. SET STATUS TO SPEAKING
                 setStatus("Speaking", true); 
 
-                // 4. Start Voice
                 speak(data.reply);
 
             } catch (error) {
@@ -410,29 +410,53 @@
             }
         };
 
-        function addMessage(text, sender, metadata = null) {
-            const div = document.createElement('div');
-            div.className = `message ${sender}-msg`;
-            
-            if (sender === 'agent' && metadata && metadata.query) {
-                const metaDiv = document.createElement('div');
-                metaDiv.style.fontSize = '0.75rem';
-                metaDiv.style.marginBottom = '10px';
-                metaDiv.style.color = '#64748b';
-                metaDiv.style.fontFamily = 'monospace';
-                metaDiv.textContent = `> INTENT: ${metadata.query}`;
-                div.appendChild(metaDiv);
+        function confidenceLabel(confidence) {
+            if (confidence >= 0.8) {
+                return { text: "High confidence", color: "#22c55e" };
             }
-
-            const textNode = document.createElement('div');
-            textNode.textContent = text;
-            div.appendChild(textNode);
-
-            chatContainer.appendChild(div);
-            setTimeout(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 50);
+            if (confidence >= 0.65) {
+                return { text: "Medium confidence", color: "#eab308" };
+            }
+                return { text: "Low confidence", color: "#ef4444" };
         }
+
+        function addMessage(text, sender, metadata = null) {
+    const div = document.createElement('div');
+    div.className = `message ${sender}-msg`;
+
+    // -------- CONFIDENCE BADGE (NEW) --------
+    if (sender === 'agent' && metadata && metadata.confidence !== undefined) {
+        const conf = confidenceLabel(metadata.confidence);
+
+        const badge = document.createElement('div');
+        badge.style.fontSize = '0.7rem';
+        badge.style.marginBottom = '8px';
+        badge.style.color = conf.color;
+        badge.style.fontFamily = 'monospace';
+        badge.textContent = `● ${conf.text}`;
+
+        div.appendChild(badge);
+    }
+
+    if (sender === 'agent' && metadata && metadata.query) {
+        const metaDiv = document.createElement('div');
+        metaDiv.style.fontSize = '0.75rem';
+        metaDiv.style.marginBottom = '10px';
+        metaDiv.style.color = '#64748b';
+        metaDiv.style.fontFamily = 'monospace';
+        metaDiv.textContent = `> INTENT: ${metadata.query}`;
+        div.appendChild(metaDiv);
+    }
+
+    const textNode = document.createElement('div');
+    textNode.textContent = text;
+    div.appendChild(textNode);
+
+    chatContainer.appendChild(div);
+    setTimeout(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }, 50);
+}
 
         function speak(text) {
             window.speechSynthesis.cancel();
@@ -441,8 +465,6 @@
             const preferredVoice = voices.find(v => v.lang.includes('IN')) || voices[0];
             if (preferredVoice) utterance.voice = preferredVoice;
 
-            // --- THE FIX ---
-            // When speech ends, force the status text back to Standby
             utterance.onend = () => {
                 setStatus("Standby", false);
             };
