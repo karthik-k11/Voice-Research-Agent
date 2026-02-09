@@ -99,7 +99,7 @@ These safeguards ensure the system fails **gracefully and predictably**.
 
 ## Technology Stack
 
-- **Backend:** FastAPI (local execution)
+- **Backend:** FastAPI
 - **Agents & Orchestration:** Custom multi-agent pipeline
 - **Retrieval:** Wikipedia API, Web search, ArXiv
 - **LLM Inference:** Groq (LLaMA-3.x)
@@ -132,5 +132,4 @@ These safeguards ensure the system fails **gracefully and predictably**.
 
 ## Status
 
-This project is intentionally maintained as a **local application** for experimentation, learning, and architectural clarity.  
-It is not intended for public deployment in its current form.
+This project is intentionally maintained as a **local application** for experimentation, learning, and architectural clarity.
