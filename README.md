@@ -9,6 +9,20 @@ Unlike standard chatbot implementations, this project focuses on **agent orchest
 
 ---
 
+## Working Screenshots
+
+### Standby
+![Standby UI](images/Standby%20process.png)
+
+### Listening
+![Listening](images/Listening%20Process.png)
+
+### Processing
+![Processing](images/Processing%20Process.png)
+
+### Speaking
+![Speaking](images/Speaking%20Process.png)
+
 ## Key Objectives
 
 - Build a **voice-first AI system** that can operate reliably under noisy and incomplete speech input.
