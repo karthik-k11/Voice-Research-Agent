@@ -35,7 +35,7 @@ Unlike standard chatbot implementations, this project focuses on **agent orchest
 
 ## System Architecture
 
-The system is composed of four coordinated agents:
+The system is composed of four coordinated agents, They are:
 
 ### 1. Planner Agent
 - Interprets user intent from transcribed speech.
